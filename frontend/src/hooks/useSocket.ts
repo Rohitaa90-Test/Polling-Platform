@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import toast from 'react-hot-toast';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL!;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL!.replace(/\/+$/, '');
 
 let socketInstance: Socket | null = null;
 
