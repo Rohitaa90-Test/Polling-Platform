@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import http from 'http';
+import https from 'https';
 import { Server } from 'socket.io';
 import app from './app';
 import { handleSocketConnection, registerPollEndCallback } from './socket/poll.socket';
@@ -53,6 +54,28 @@ console.log('[DEBUG] Socket handler registered');
 
 httpServer.listen(PORT, () => {
   console.log(`[DEBUG] Server listening on port ${PORT}`);
+
+  // --- Keep-alive ping for Render free tier ---
+  // Render sleeps after 15 min of inactivity. Ping /health every 14 min to stay awake.
+  if (process.env.NODE_ENV === 'production') {
+    const BACKEND_URL = process.env.RENDER_EXTERNAL_URL || process.env.BACKEND_URL;
+    if (BACKEND_URL) {
+      const pingUrl = `${BACKEND_URL}/health`;
+      setInterval(() => {
+        const client = pingUrl.startsWith('https') ? https : http;
+        const req = client.get(pingUrl, (res) => {
+          console.log(`[KEEP-ALIVE] Ping → ${res.statusCode}`);
+        });
+        req.on('error', (err) => {
+          console.error('[KEEP-ALIVE] Ping failed:', err.message);
+        });
+        req.end();
+      }, 14 * 60 * 1000); // every 14 minutes
+      console.log(`[KEEP-ALIVE] Ping scheduled → ${pingUrl}`);
+    } else {
+      console.warn('[KEEP-ALIVE] RENDER_EXTERNAL_URL / BACKEND_URL not set — skipping ping.');
+    }
+  }
 });
 
 console.log('[DEBUG] Server setup complete');

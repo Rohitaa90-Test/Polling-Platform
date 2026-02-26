@@ -151,6 +151,9 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
 
       if (data.poll) {
+        // Mark this poll ID as seen — so when socket's poll-started arrives
+        // for the same poll, it's treated as recovery, NOT a new poll
+        previousPollIdRef.current = data.poll.id;
         setActivePoll(data.poll);
         setResults(data.results || []);
         setRemainingTime(data.remainingTime ?? 0);
@@ -202,19 +205,32 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
 
   /* -- Socket event listeners --------------------------------------- */
   useEffect(() => {
-    const onPollStarted = (data: { poll: Poll; results: VoteResult[]; remainingTime: number }) => {
+    const onPollStarted = (data: {
+      poll: Poll;
+      results: VoteResult[];
+      remainingTime: number;
+      hasVoted?: boolean;
+      studentVote?: number | null;
+    }) => {
       const isNewPoll = previousPollIdRef.current !== data.poll.id;
       previousPollIdRef.current = data.poll.id;
-      
+
       setActivePoll(data.poll);
       setResults(data.results || []);
       setRemainingTime(data.remainingTime);
-      setHasVoted(false);
-      setStudentVote(null);
-      
-      // Only show toast for students when a genuinely new poll is created
-      if (role === 'student' && isNewPoll) {
-        toast.success('New question asked!', { id: 'poll-started' });
+
+      if (isNewPoll) {
+        // Genuinely new poll — reset voted state for everyone
+        setHasVoted(false);
+        setStudentVote(null);
+        if (role === 'student') {
+          toast.success('New question asked!', { id: 'poll-started' });
+        }
+      } else {
+        // Recovery path (refresh/reconnect) — use server-sent values to
+        // avoid overwriting the already-correct HTTP-fetched state
+        if (data.hasVoted !== undefined) setHasVoted(data.hasVoted);
+        if (data.studentVote !== undefined) setStudentVote(data.studentVote ?? null);
       }
     };
 

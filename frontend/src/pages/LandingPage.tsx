@@ -42,7 +42,7 @@ export default function LandingPage() {
           />
           <RoleCard
             title="I'm a Teacher"
-            description="Submit answers and view live poll results in real-time."
+            description="Create polls, manage students, and monitor responses in real-time."
             isSelected={selected === 'teacher'}
             onClick={() => setSelected('teacher')}
           />
@@ -75,11 +75,10 @@ function RoleCard({ title, description, isSelected, onClick }: RoleCardProps) {
   return (
     <button
       onClick={onClick}
-      className={`text-left p-5 rounded-xl border-2 transition-all duration-200 focus:outline-none ${
-        isSelected
+      className={`text-left p-5 rounded-xl border-2 transition-all duration-200 focus:outline-none ${isSelected
           ? 'border-[#5767D0] bg-purple-50 shadow-sm'
           : 'border-gray-200 bg-white hover:border-[#7765DA] hover:bg-purple-50/30'
-      }`}
+        }`}
       style={isSelected ? { borderStyle: 'dashed' } : {}}
     >
       <p className="font-bold text-[#373737] text-sm mb-1">{title}</p>

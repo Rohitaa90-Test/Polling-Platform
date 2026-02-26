@@ -12,14 +12,6 @@ export default function LiveDashboard() {
   const totalVotes = results.reduce((sum, r) => sum + r.count, 0);
   const isPollEnded = activePoll.status === 'ended';
 
-  const handleAskNew = () => {
-    // Reset to poll creation — parent TeacherPage handles this via activePoll state
-    // We emit nothing here; TeacherPage shows PollCreator when activePoll is null/ended
-    // Teacher clicks this, we set activePoll to null via context reset not needed —
-    // Backend will only allow new poll when previous ended.
-    // This button is just a UI hint; actual creation happens in PollCreator.
-  };
-
   return (
     <div className="w-full max-w-2xl mx-auto">
       {/* Question header */}
@@ -82,17 +74,6 @@ export default function LiveDashboard() {
         )}
       </div>
 
-      {/* Ask new question button — shown only when poll ended */}
-      {isPollEnded && (
-        <div className="flex justify-center">
-          <button
-            onClick={handleAskNew}
-            className="bg-gradient-to-r from-[#7765DA] to-[#4F0DCE] text-white font-semibold py-2.5 px-6 rounded-full text-sm hover:opacity-90 active:scale-95 transition-all"
-          >
-            + Ask a new question
-          </button>
-        </div>
-      )}
     </div>
   );
 }
