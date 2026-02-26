@@ -5,7 +5,7 @@ import app from './app';
 import { handleSocketConnection, registerPollEndCallback } from './socket/poll.socket';
 import { restoreActiveTimer } from './services/poll.service';
 
-const PORT = parseInt(process.env.PORT!, 10);
+const PORT = parseInt(process.env.PORT || '3000', 10);
 const FRONTEND_URL = process.env.FRONTEND_URL!;
 
 // --- HTTP + Socket.io setup ---
