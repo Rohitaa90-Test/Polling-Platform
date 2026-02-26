@@ -29,11 +29,10 @@ export function useSocket() {
     }
 
     socket.on('connect', () => {
-      console.log('[Socket] Connected:', socket.id);
+      // Connected
     });
 
     socket.on('disconnect', (reason) => {
-      console.warn('[Socket] Disconnected:', reason);
       if (reason !== 'io client disconnect') {
         toast.error('Connection lost. Reconnecting...', { id: 'socket-disconnect' });
       }
