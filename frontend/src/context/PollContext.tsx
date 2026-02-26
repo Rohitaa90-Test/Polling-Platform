@@ -89,7 +89,8 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   // Loading / kicked
-  const [isLoading, setIsLoading] = useState(false);
+  // Start as true if user is refreshing (role saved) — prevents wrong screen flash
+  const [isLoading, setIsLoading] = useState(() => !!sessionStorage.getItem('role'));
   const [isKicked, setIsKicked] = useState(false);
 
   // Track previous poll ID to detect new polls

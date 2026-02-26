@@ -41,10 +41,8 @@ export default function StudentPage() {
   // Kicked out screen
   if (isKicked) return <KickedOut />;
 
-  // Name entry — no header needed
-  if (view === 'name-entry') return <NameEntry />;
-
-  // Loading
+  // Loading — show spinner immediately on refresh before data arrives
+  // Must be before name-entry check to prevent NameEntry flashing on refresh
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -55,6 +53,9 @@ export default function StudentPage() {
       </div>
     );
   }
+
+  // Name entry — no header needed
+  if (view === 'name-entry') return <NameEntry />;
 
   return (
     <div className="min-h-screen bg-white">
