@@ -222,7 +222,8 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
       // No active poll — nothing more to do, stay on waiting screen
       if (!data.poll) return;
 
-      const isNewPoll = previousPollIdRef.current !== data.poll.id;
+      const isFirstLoad = previousPollIdRef.current === null;
+      const isNewPoll = !isFirstLoad && previousPollIdRef.current !== data.poll.id;
       previousPollIdRef.current = data.poll.id;
 
       setActivePoll(data.poll);
@@ -230,15 +231,15 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
       setRemainingTime(data.remainingTime);
 
       if (isNewPoll) {
-        // Genuinely new poll — reset voted state for everyone
+        // Genuinely new poll created while we were connected — reset voted state for everyone
         setHasVoted(false);
         setStudentVote(null);
         if (role === 'student') {
           toast.success('New question asked!', { id: 'poll-started' });
         }
       } else {
-        // Recovery path (refresh/reconnect) — use server-sent values to
-        // avoid overwriting the already-correct HTTP-fetched state
+        // First load OR Recovery path (refresh/reconnect) — use server-sent values to
+        // ensure we accurately reflect if the user has already voted
         if (data.hasVoted !== undefined) setHasVoted(data.hasVoted);
         if (data.studentVote !== undefined) setStudentVote(data.studentVote ?? null);
       }
