@@ -92,6 +92,9 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isKicked, setIsKicked] = useState(false);
 
+  // Track previous poll ID to detect new polls
+  const previousPollIdRef = useRef<string | null>(null);
+
   /* -- Initialise session identity ---------------------------------- */
   useEffect(() => {
     let id = sessionStorage.getItem('studentId');
@@ -200,12 +203,19 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
   /* -- Socket event listeners --------------------------------------- */
   useEffect(() => {
     const onPollStarted = (data: { poll: Poll; results: VoteResult[]; remainingTime: number }) => {
+      const isNewPoll = previousPollIdRef.current !== data.poll.id;
+      previousPollIdRef.current = data.poll.id;
+      
       setActivePoll(data.poll);
       setResults(data.results || []);
       setRemainingTime(data.remainingTime);
       setHasVoted(false);
       setStudentVote(null);
-      toast.success('New question asked!', { id: 'poll-started' });
+      
+      // Only show toast for students when a genuinely new poll is created
+      if (role === 'student' && isNewPoll) {
+        toast.success('New question asked!', { id: 'poll-started' });
+      }
     };
 
     const onPollUpdate = (data: { results: VoteResult[]; participants: Participant[] }) => {
