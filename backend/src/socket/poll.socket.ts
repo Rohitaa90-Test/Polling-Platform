@@ -100,8 +100,18 @@ export function handleSocketConnection(io: Server, socket: Socket) {
     try {
       const { question, options, duration } = data;
 
-      if (!question?.trim() || !options?.length || !duration) {
-        socket.emit('error', { message: 'Invalid poll data.' });
+      if (!question?.trim() || typeof question !== 'string' || question.length > 500) {
+        socket.emit('error', { message: 'Invalid question. Must be under 500 characters.' });
+        return;
+      }
+
+      if (!Array.isArray(options) || options.length < 2 || options.length > 6) {
+        socket.emit('error', { message: 'Poll must have between 2 and 6 options.' });
+        return;
+      }
+
+      if (typeof duration !== 'number' || duration < 5 || duration > 3600) {
+        socket.emit('error', { message: 'Duration must be between 5 and 3600 seconds.' });
         return;
       }
 
@@ -114,7 +124,10 @@ export function handleSocketConnection(io: Server, socket: Socket) {
       // Broadcast new poll to ALL connected clients (teachers + students)
       io.emit('poll-started', { poll, results: [], remainingTime });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create poll.';
+      let message = err instanceof Error ? err.message : 'Failed to create poll.';
+      if (message.toLowerCase().includes('prisma')) {
+        message = 'database error';
+      }
       socket.emit('error', { message });
     }
   });
@@ -136,7 +149,10 @@ export function handleSocketConnection(io: Server, socket: Socket) {
     } catch (err) {
       // Duplicate vote or ended poll — revert optimistic UI
       socket.emit('vote-error');
-      const message = err instanceof Error ? err.message : 'Vote failed.';
+      let message = err instanceof Error ? err.message : 'Vote failed.';
+      if (message.toLowerCase().includes('prisma')) {
+        message = 'database error';
+      }
       socket.emit('error', { message });
     }
   });
@@ -166,8 +182,13 @@ export function handleSocketConnection(io: Server, socket: Socket) {
   /* ---------- send-chat ---------- */
   socket.on('send-chat', (msg: ChatMessage) => {
     try {
+      if (!msg || typeof msg.text !== 'string') return;
+
+      const text = msg.text.trim();
+      if (!text || text.length > 500) return; // Prevent empty or ridiculously huge broadcast payloads
+
       // Broadcast to all EXCEPT sender (sender already added locally)
-      socket.broadcast.emit('chat-message', msg);
+      socket.broadcast.emit('chat-message', { ...msg, text });
     } catch (err) {
       // Error sending chat
     }

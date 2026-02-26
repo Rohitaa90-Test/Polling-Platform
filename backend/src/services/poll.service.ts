@@ -167,6 +167,12 @@ export async function submitVote(
   if (!poll) throw new Error('Poll not found.');
   if (poll.status !== 'active') throw new Error('Poll has already ended.');
 
+  // Guard: valid option index
+  const optionsArray = poll.options as unknown as unknown[];
+  if (optionIndex < 0 || optionIndex >= optionsArray.length) {
+    throw new Error('Invalid option selected.');
+  }
+
   // DB insert — UNIQUE(pollId, studentId) will throw on duplicate
   await prisma.vote.create({
     data: { pollId, studentId, studentName, optionIndex },
