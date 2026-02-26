@@ -160,7 +160,7 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch {
-      toast.error('Could not reach server. Please refresh.', { id: 'state-recovery' });
+      // Silently fail - socket connection will handle state
     } finally {
       setIsLoading(false);
     }
