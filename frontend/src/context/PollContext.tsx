@@ -164,10 +164,11 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
           setStudentVote(data.studentVote ?? null);
         }
       }
-    } catch {
-      // Silently fail - socket connection will handle state
-    } finally {
+      // HTTP fetch succeeded — dismiss loading immediately
       setIsLoading(false);
+    } catch {
+      // HTTP fetch failed (cold start / timeout) — keep isLoading=true
+      // Socket's poll-started will confirm state and dismiss loading
     }
   }, []);
 
@@ -208,12 +209,19 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
   /* -- Socket event listeners --------------------------------------- */
   useEffect(() => {
     const onPollStarted = (data: {
-      poll: Poll;
+      poll: Poll | null;  // null when no active poll exists
       results: VoteResult[];
       remainingTime: number;
       hasVoted?: boolean;
       studentVote?: number | null;
     }) => {
+      // Socket confirmed current state — always dismiss loading spinner
+      // This is the fallback when HTTP fetch failed (Render cold start etc.)
+      setIsLoading(false);
+
+      // No active poll — nothing more to do, stay on waiting screen
+      if (!data.poll) return;
+
       const isNewPoll = previousPollIdRef.current !== data.poll.id;
       previousPollIdRef.current = data.poll.id;
 
