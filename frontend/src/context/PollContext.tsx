@@ -39,6 +39,7 @@ interface PollContextValue {
 
   // Poll history
   pollHistory: PollHistoryItem[];
+  refreshHistory: () => Promise<void>;
 
   // Participants (teacher view)
   participants: Participant[];
@@ -334,7 +335,7 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
       studentId: studentId.current,
       studentName, setStudentName,
       activePoll, results, remainingTime, hasVoted, studentVote,
-      pollHistory,
+      pollHistory, refreshHistory: fetchHistory,
       participants,
       chatMessages, sendChatMessage,
       createPoll, submitVote, kickStudent,

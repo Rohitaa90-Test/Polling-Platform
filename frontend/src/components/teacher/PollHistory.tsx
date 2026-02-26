@@ -1,9 +1,16 @@
+import { useEffect } from 'react';
 import { usePoll } from '../../context/PollContext';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export default function PollHistory() {
-  const { pollHistory } = usePoll();
+  const { pollHistory, refreshHistory } = usePoll();
+
+  // Re-fetch every time this tab is opened — ensures fresh data
+  // even if the initial fetch at login failed silently (e.g. Render cold start)
+  useEffect(() => {
+    refreshHistory();
+  }, [refreshHistory]);
 
   if (pollHistory.length === 0) {
     return (
