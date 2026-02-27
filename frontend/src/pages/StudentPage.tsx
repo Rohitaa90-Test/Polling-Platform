@@ -17,6 +17,7 @@ export default function StudentPage() {
     hasVoted,
     isLoading,
     isKicked,
+    participants,
   } = usePoll();
 
   const [timerExpired, setTimerExpired] = useState(false);
@@ -74,7 +75,7 @@ export default function StudentPage() {
       </main>
 
       {/* Chat popup */}
-      <ChatPopup showKick={false} />
+      <ChatPopup showKick={false} participants={participants} />
     </div>
   );
 }

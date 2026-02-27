@@ -51,9 +51,9 @@ export default function ChatPopup({ participants = [], showKick = false, onKick 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
         )}
       </button>
 
@@ -64,21 +64,19 @@ export default function ChatPopup({ participants = [], showKick = false, onKick 
           <div className="flex border-b border-gray-100">
             <button
               onClick={() => setActiveTab('chat')}
-              className={`flex-1 py-3 text-sm font-semibold transition-colors ${
-                activeTab === 'chat'
+              className={`flex-1 py-3 text-sm font-semibold transition-colors ${activeTab === 'chat'
                   ? 'text-[#7765DA] border-b-2 border-[#7765DA]'
                   : 'text-[#6E6E6E] hover:text-[#373737]'
-              }`}
+                }`}
             >
               Chat
             </button>
             <button
               onClick={() => setActiveTab('participants')}
-              className={`flex-1 py-3 text-sm font-semibold transition-colors ${
-                activeTab === 'participants'
+              className={`flex-1 py-3 text-sm font-semibold transition-colors ${activeTab === 'participants'
                   ? 'text-[#7765DA] border-b-2 border-[#7765DA]'
                   : 'text-[#6E6E6E] hover:text-[#373737]'
-              }`}
+                }`}
             >
               Participants
             </button>
@@ -97,11 +95,10 @@ export default function ChatPopup({ participants = [], showKick = false, onKick 
                     <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                       <span className="text-xs text-[#6E6E6E] mb-0.5">{msg.senderName}</span>
                       <div
-                        className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${
-                          isMe
+                        className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${isMe
                             ? 'bg-[#7765DA] text-white rounded-br-sm'
                             : 'bg-[#F2F2F2] text-[#373737] rounded-bl-sm'
-                        }`}
+                          }`}
                       >
                         {msg.text}
                       </div>
@@ -144,19 +141,21 @@ export default function ChatPopup({ participants = [], showKick = false, onKick 
               {participants.length === 0 && (
                 <p className="text-center text-[#6E6E6E] text-xs mt-8">No participants yet.</p>
               )}
-              {participants.map((p) => (
-                <div key={p.studentId} className="flex items-center px-4 py-3 border-b border-gray-50 hover:bg-gray-50">
-                  <span className="flex-1 text-sm text-[#373737] font-medium">{p.studentName}</span>
-                  {showKick && onKick && (
-                    <button
-                      onClick={() => onKick(p.studentId)}
-                      className="text-xs text-red-500 hover:text-red-600 font-semibold transition-colors"
-                    >
-                      Kick out
-                    </button>
-                  )}
-                </div>
-              ))}
+              {participants
+                .filter((p) => p.studentId !== myId)
+                .map((p) => (
+                  <div key={p.studentId} className="flex items-center px-4 py-3 border-b border-gray-50 hover:bg-gray-50">
+                    <span className="flex-1 text-sm text-[#373737] font-medium">{p.studentName}</span>
+                    {showKick && onKick && (
+                      <button
+                        onClick={() => onKick(p.studentId)}
+                        className="text-xs text-red-500 hover:text-red-600 font-semibold transition-colors"
+                      >
+                        Kick out
+                      </button>
+                    )}
+                  </div>
+                ))}
               {/* Show self if student */}
               {!showKick && studentName && (
                 <div className="flex items-center px-4 py-3 border-b border-gray-50">
