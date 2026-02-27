@@ -214,10 +214,15 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
       remainingTime: number;
       hasVoted?: boolean;
       studentVote?: number | null;
+      participants?: Participant[];
     }) => {
       // Socket confirmed current state — always dismiss loading spinner
-      // This is the fallback when HTTP fetch failed (Render cold start etc.)
       setIsLoading(false);
+
+      // Always populate participants initially, even if there's no active poll
+      if (data.participants) {
+        setParticipants(data.participants);
+      }
 
       // No active poll — nothing more to do, stay on waiting screen
       if (!data.poll) return;
