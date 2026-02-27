@@ -182,12 +182,16 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
       emit('join-as-teacher');
       fetchHistory();
     } else {
-      emit('join-as-student', {
-        studentId: studentId.current,
-        studentName: sessionStorage.getItem('studentName') || '',
-      });
+      // Only join as student if we have a name
+      // This fix ensures that newly on-boarded students show up for the teacher instantly
+      if (studentName) {
+        emit('join-as-student', {
+          studentId: studentId.current,
+          studentName,
+        });
+      }
     }
-  }, [role, emit, fetchCurrentState, fetchHistory]);
+  }, [role, studentName, emit, fetchCurrentState, fetchHistory]);
 
   /* -- Socket reconnect: re-join ------------------------------------ */
   useEffect(() => {
