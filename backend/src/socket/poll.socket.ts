@@ -126,8 +126,11 @@ export function handleSocketConnection(io: Server, socket: Socket) {
         duration
       );
 
+      // Clear chat history for the new poll
+      chatHistory.length = 0;
+
       // Broadcast new poll to ALL connected clients (teachers + students)
-      io.emit('poll-started', { poll, results: [], remainingTime });
+      io.emit('poll-started', { poll, results: [], remainingTime, chatMessages: [] });
     } catch (err) {
       let message = err instanceof Error ? err.message : 'Failed to create poll.';
       if (message.toLowerCase().includes('prisma')) {
