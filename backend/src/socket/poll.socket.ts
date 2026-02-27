@@ -16,6 +16,9 @@ const participants = new Map<string, Participant>();
 // In-memory teacher socket id (only one teacher at a time for simplicity)
 let teacherSocketId: string | null = null;
 
+// In-memory chat history (last 50 messages)
+const chatHistory: ChatMessage[] = [];
+
 /* ------------------------------------------------------------------ */
 /*  Helper: broadcast updated participants list to all                  */
 /* ------------------------------------------------------------------ */
@@ -62,6 +65,7 @@ export function handleSocketConnection(io: Server, socket: Socket) {
         results: state.results,
         remainingTime: state.remainingTime,
         participants: list,
+        chatMessages: chatHistory,
       });
     } catch (err) {
       socket.emit('error', { message: 'Failed to join as teacher.' });
@@ -86,6 +90,7 @@ export function handleSocketConnection(io: Server, socket: Socket) {
         remainingTime: state.remainingTime,
         hasVoted: state.hasVoted,
         studentVote: state.studentVote,
+        chatMessages: chatHistory,
       });
 
       // Broadcast updated participants list to all
@@ -186,6 +191,10 @@ export function handleSocketConnection(io: Server, socket: Socket) {
 
       const text = msg.text.trim();
       if (!text || text.length > 500) return; // Prevent empty or ridiculously huge broadcast payloads
+
+      // Add to history
+      chatHistory.push({ ...msg, text });
+      if (chatHistory.length > 50) chatHistory.shift();
 
       // Broadcast to all EXCEPT sender (sender already added locally)
       socket.broadcast.emit('chat-message', { ...msg, text });

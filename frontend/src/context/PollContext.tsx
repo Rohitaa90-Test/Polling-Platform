@@ -219,6 +219,7 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
       hasVoted?: boolean;
       studentVote?: number | null;
       participants?: Participant[];
+      chatMessages?: ChatMessage[];
     }) => {
       // Socket confirmed current state — always dismiss loading spinner
       setIsLoading(false);
@@ -226,6 +227,11 @@ export function PollProvider({ children }: { children: React.ReactNode }) {
       // Always populate participants initially, even if there's no active poll
       if (data.participants) {
         setParticipants(data.participants);
+      }
+
+      // Always populate chat history initially
+      if (data.chatMessages) {
+        setChatMessages(data.chatMessages);
       }
 
       // No active poll — nothing more to do, stay on waiting screen
