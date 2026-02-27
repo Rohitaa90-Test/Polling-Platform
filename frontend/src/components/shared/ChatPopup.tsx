@@ -9,11 +9,13 @@ interface ChatPopupProps {
 }
 
 export default function ChatPopup({ participants = [], showKick = false, onKick }: ChatPopupProps) {
-  const { chatMessages, sendChatMessage, role, studentId, studentName } = usePoll();
+  const { chatMessages, sendChatMessage, role, studentId, studentName, activePoll } = usePoll();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'participants'>('chat');
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const isChatDisabled = role === 'student' && activePoll?.status === 'active';
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -23,6 +25,7 @@ export default function ChatPopup({ participants = [], showKick = false, onKick 
   }, [chatMessages, isOpen]);
 
   const handleSend = () => {
+    if (isChatDisabled) return;
     const text = inputText.trim();
     if (!text) return;
     sendChatMessage(text);
@@ -65,8 +68,8 @@ export default function ChatPopup({ participants = [], showKick = false, onKick 
             <button
               onClick={() => setActiveTab('chat')}
               className={`flex-1 py-3 text-sm font-semibold transition-colors ${activeTab === 'chat'
-                  ? 'text-[#7765DA] border-b-2 border-[#7765DA]'
-                  : 'text-[#6E6E6E] hover:text-[#373737]'
+                ? 'text-[#7765DA] border-b-2 border-[#7765DA]'
+                : 'text-[#6E6E6E] hover:text-[#373737]'
                 }`}
             >
               Chat
@@ -74,8 +77,8 @@ export default function ChatPopup({ participants = [], showKick = false, onKick 
             <button
               onClick={() => setActiveTab('participants')}
               className={`flex-1 py-3 text-sm font-semibold transition-colors ${activeTab === 'participants'
-                  ? 'text-[#7765DA] border-b-2 border-[#7765DA]'
-                  : 'text-[#6E6E6E] hover:text-[#373737]'
+                ? 'text-[#7765DA] border-b-2 border-[#7765DA]'
+                : 'text-[#6E6E6E] hover:text-[#373737]'
                 }`}
             >
               Participants
@@ -96,9 +99,9 @@ export default function ChatPopup({ participants = [], showKick = false, onKick 
                       <span className="text-xs text-[#6E6E6E] mb-0.5">{msg.senderName}</span>
                       <div
                         className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${isMe
-                            ? 'bg-[#7765DA] text-white rounded-br-sm'
-                            : 'bg-[#F2F2F2] text-[#373737] rounded-bl-sm'
-                          }`}
+                          ? 'bg-[#7765DA] text-white rounded-br-sm'
+                          : 'bg-[#F2F2F2] text-[#373737] rounded-bl-sm'
+                          } ${isChatDisabled ? 'opacity-70' : ''}`}
                       >
                         {msg.text}
                       </div>
@@ -107,18 +110,28 @@ export default function ChatPopup({ participants = [], showKick = false, onKick 
                 })}
                 <div ref={messagesEndRef} />
               </div>
+
+              {isChatDisabled && (
+                <div className="px-3 py-1 bg-yellow-50 border-t border-yellow-100">
+                  <p className="text-[10px] text-yellow-700 font-medium text-center">
+                    Chat is disabled until the poll ends. Focus on the question! 🎯
+                  </p>
+                </div>
+              )}
+
               <div className="p-3 border-t border-gray-100 flex gap-2">
                 <input
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type a message..."
-                  className="flex-1 px-3 py-2 rounded-full bg-[#F2F2F2] text-sm text-[#373737] placeholder-[#6E6E6E] focus:outline-none focus:ring-2 focus:ring-[#7765DA]"
+                  disabled={isChatDisabled}
+                  placeholder={isChatDisabled ? "Chatting paused..." : "Type a message..."}
+                  className="flex-1 px-3 py-2 rounded-full bg-[#F2F2F2] text-sm text-[#373737] placeholder-[#6E6E6E] focus:outline-none focus:ring-2 focus:ring-[#7765DA] disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />
                 <button
                   onClick={handleSend}
-                  disabled={!inputText.trim()}
+                  disabled={!inputText.trim() || isChatDisabled}
                   className="w-8 h-8 rounded-full bg-[#7765DA] text-white flex items-center justify-center disabled:opacity-40 hover:bg-[#5767D0] transition-colors"
                 >
                   <svg className="w-4 h-4 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
